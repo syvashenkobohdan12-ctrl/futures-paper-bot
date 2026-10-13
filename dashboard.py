@@ -97,7 +97,7 @@ table{{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}} t
 .pos{{color:var(--pos)}} .neg{{color:var(--neg)}} .chart{{position:relative;height:260px}}
 </style></head><body><main>
 <h1>Futures paper bot <span class="muted" style="font-size:13px;font-weight:400">· PAPER · Kraken perps BTC/ETH/SOL · no real orders</span></h1>
-<div class="muted">Updated {dt.datetime.now():%Y-%m-%d %H:%M} local · last closed bar {state['last_ts'][:16]} UTC · page refreshes every 5 min
+<div class="muted">Updated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · last closed bar {state['last_ts'][:16]} UTC · page refreshes every 5 min
 {' · <b class="neg">LIQUIDATED ' + state['liquidated'] + '</b>' if state.get('liquidated') else ''}</div>
 <div class="kpis">{kpi_html}</div>
 <h2>Equity</h2><div class="card"><div class="chart"><canvas id="eq"></canvas></div><div id="eqmsg" class="muted"></div></div>
