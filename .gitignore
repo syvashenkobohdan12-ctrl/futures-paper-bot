@@ -1,0 +1,22 @@
+# Whitelist: only the paper bot and its state go to GitHub (research scripts, data cache and results stay local)
+/*
+!/.gitignore
+!/.github/
+!/README.md
+!/requirements.txt
+!/live_bot.py
+!/risk.py
+!/dashboard.py
+!/combo.py
+!/backtest.py
+!/strategies.py
+!/data.py
+!/patterns.py
+!/waves.py
+!/test_backtest.py
+!/paper_state.json
+!/paper_events.csv
+!/paper_equity.csv
+!/paper_bot.log
+!/dashboard.html
+!/index.html

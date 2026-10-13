@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="300"><title>Futures paper bot</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--ink:#111;--mut:#777;--line:#e5e4de;--pos:#13804b;--neg:#c23b3b;--acc:#2a78d6}
+@media (prefers-color-scheme:dark){:root{--bg:#151514;--card:#1e1e1c;--ink:#eee;--mut:#999;--line:#333;--pos:#3fbf7f;--neg:#ef6b6b;--acc:#3987e5}}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif} main{max-width:1100px;margin:auto;padding:16px}
+h1{font-size:20px;font-weight:600;margin:0} h2{font-size:15px;font-weight:600;margin:24px 0 8px} .muted{color:var(--mut)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px} .lab{color:var(--mut);font-size:12px} .val{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap} th{color:var(--mut);font-weight:500;font-size:12px}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .chart{position:relative;height:260px}
+</style></head><body><main>
+<h1>Futures paper bot <span class="muted" style="font-size:13px;font-weight:400">· PAPER · Kraken perps BTC/ETH/SOL · no real orders</span></h1>
+<div class="muted">Updated 2026-10-12 21:54 local · last closed bar 2026-10-13 02:00 UTC · page refreshes every 5 min
+</div>
+<div class="kpis"><div class='kpi'><div class='lab'>Equity</div><div class='val '>$100,000</div></div><div class='kpi'><div class='lab'>P&L</div><div class='val '>$0 (+0.00%)</div></div><div class='kpi'><div class='lab'>Drawdown</div><div class='val '>0.00%</div></div><div class='kpi'><div class='lab'>Exposure</div><div class='val '>0.00x</div></div><div class='kpi'><div class='lab'>Closed trades</div><div class='val '>0</div></div><div class='kpi'><div class='lab'>Funding P&L</div><div class='val '>$0</div></div></div>
+<h2>Equity</h2><div class="card"><div class="chart"><canvas id="eq"></canvas></div><div id="eqmsg" class="muted"></div></div>
+<h2>Drawdown from peak</h2><div class="card"><div class="chart" style="height:160px"><canvas id="dd"></canvas></div></div>
+<h2>Open positions</h2><div class="card"><table><tr><th>Coin</th><th>Strategy</th><th>Side</th><th>Opened (UTC)</th><th>Entry</th><th>Now</th><th>Size</th><th>Stop</th><th>Target</th><th>Time left</th><th>Unrealized</th></tr><tr><td colspan='11' class='muted'>No open positions</td></tr></table></div>
+<h2>Signals</h2><div class="card"><table><tr><th>Coin</th><th>Strategy</th><th>Signal</th><th>Daily ADX</th><th>Status</th></tr><tr><td>BTC</td><td>daily_mom</td><td class='pos'>LONG</td><td>32</td><td>waiting for a fresh flip (joined mid-trend not allowed)</td></tr><tr><td>BTC</td><td>macd_4h</td><td class=''>FLAT</td><td>32</td><td>skipped: this trend began while daily ADX was > 40 (stretched); waits for the next flip</td></tr><tr><td>ETH</td><td>daily_mom</td><td class='pos'>LONG</td><td>31</td><td>waiting for a fresh flip (joined mid-trend not allowed)</td></tr><tr><td>ETH</td><td>macd_4h</td><td class=''>FLAT</td><td>31</td><td>skipped: this trend began while daily ADX was > 40 (stretched); waits for the next flip</td></tr><tr><td>SOL</td><td>daily_mom</td><td class='pos'>LONG</td><td>32</td><td>waiting for a fresh flip (joined mid-trend not allowed)</td></tr><tr><td>SOL</td><td>macd_4h</td><td class=''>FLAT</td><td>32</td><td>skipped: this trend began while daily ADX was > 40 (stretched); waits for the next flip</td></tr></table></div>
+<h2>Market</h2><div class="card"><table><tr><th>Perp</th><th>Price</th><th>24h</th><th>Funding (annualized, last 24h; + = longs pay)</th></tr><tr><td>BTC</td><td>82,840.00</td><td class='neg'>-1.09%</td><td>+10.0%</td></tr><tr><td>ETH</td><td>2,489.10</td><td class='neg'>-2.20%</td><td>+5.5%</td></tr><tr><td>SOL</td><td>106.64</td><td class='neg'>-4.73%</td><td>+7.1%</td></tr></table></div>
+<h2>Recent activity</h2><div class="card"><table><tr><th>Bar (UTC)</th><th>Event</th><th>Leg</th><th>Side</th><th>Price</th><th>Exit reason</th><th>P&amp;L</th></tr><tr><td colspan='7' class='muted'>No trades yet</td></tr></table></div>
+<p class="muted">Rules: 2% risk/trade · 5% stop · 15% target · max 7 days (re-entry if signal holds) · stop to breakeven after +7.5% · 10x cap.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const D={"t": ["2026-10-13 02:00"], "eq": [100000], "dd": [0.0]}, css=getComputedStyle(document.documentElement), acc=css.getPropertyValue('--acc').trim(), mut=css.getPropertyValue('--mut').trim(), line=css.getPropertyValue('--line').trim();
+if(D.eq.length<2){document.getElementById('eqmsg').textContent='The curve fills in as hours are processed (one point per hour).';}
+const opt=(fmt)=>({responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},
+ scales:{x:{ticks:{color:mut,maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{ticks:{color:mut,callback:fmt},grid:{color:line}}}});
+new Chart(eq,{type:'line',data:{labels:D.t,datasets:[{data:D.eq,borderColor:acc,borderWidth:2,pointRadius:0,tension:.1}]},options:opt(v=>'$'+Math.round(v).toLocaleString())});
+new Chart(dd,{type:'line',data:{labels:D.t,datasets:[{data:D.dd,borderColor:acc,backgroundColor:acc+'22',fill:'origin',borderWidth:1.5,pointRadius:0}]},options:opt(v=>v.toFixed(1)+'%')});
+</script></body></html>
