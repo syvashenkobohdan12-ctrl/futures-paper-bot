@@ -37,7 +37,7 @@ def step(state, ts, bars, sigs, risk=RISK, stop_pct=STOP, max_lev=MAX_LEV, cost=
         t = opn.pop(k)
         pnl = t["d"] * t["u"] * (px - t["e"]) - t["u"] * px * cost
         state["cash"] += pnl
-        ev.append(dict(ts=str(ts), event="close", leg=k, side=t["d"], units=t["u"], px=px, why=why,
+        ev.append(dict(ts=str(ts), event="close", leg=k, side=t["d"], units=t["u"], px=px, entry_px=t["e"], why=why,
                        pnl=pnl + t["acc"], entry_ts=t["entry"]))
 
     # 1) intrabar: funding, stops, liquidation check

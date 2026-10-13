@@ -14,6 +14,11 @@ def _money(v):
     return ("-" if v < 0 else "") + f"${abs(v):,.0f}"
 
 
+def _when(ts):
+    """Bars are labelled by their start hour; the bot acts at the bar's close, one hour later."""
+    return (pd.Timestamp(ts) + pd.Timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
+
+
 def _cls(v):
     return "pos" if v > 0 else "neg" if v < 0 else ""
 
@@ -39,7 +44,7 @@ def render(state, h1, sig, cfg):
         left = pd.Timestamp(t["entry"]) + pd.Timedelta(hours=cfg["max_hold"]) - last_bar
         upnl = d * t["u"] * (p - t["e"])
         pos_rows.append(f"<tr><td>{c}</td><td>{sleeve}</td><td class='{_cls(d)}'>{'LONG' if d > 0 else 'SHORT'}</td>"
-                        f"<td>{t['entry'][:16]}</td><td>{t['e']:,.2f}</td><td>{p:,.2f}</td><td>{_money(t['u'] * p)}</td>"
+                        f"<td>{_when(t['entry'])}</td><td>{t['e']:,.2f}</td><td>{p:,.2f}</td><td>{_money(t['u'] * p)}</td>"
                         f"<td>{t['sp']:,.2f}{' (BE)' if t.get('be') else ''}</td><td>{tp:,.2f}</td>"
                         f"<td>{max(left.total_seconds(), 0) / 86400:.1f}d</td><td class='{_cls(upnl)}'>{_money(upnl)}</td></tr>")
     pos_html = "".join(pos_rows) or "<tr><td colspan='11' class='muted'>No open positions</td></tr>"
@@ -49,6 +54,7 @@ def render(state, h1, sig, cfg):
     for k, s in sig.items():
         c, sleeve = k.split("|")
         now = int(s.iloc[-1])
+        since = s.index[s.ne(s.shift())][-1]
         d1 = h1[c].resample("1D").agg(AGG).dropna()
         a = to_hourly(adx(d1), 24, h1[c].index).iloc[-1]
         if k in state["open"]:
@@ -60,7 +66,7 @@ def render(state, h1, sig, cfg):
         else:
             status = "waiting for a fresh flip (joined mid-trend not allowed)"
         sig_rows.append(f"<tr><td>{c}</td><td>{sleeve}</td><td class='{_cls(now)}'>{['SHORT', 'FLAT', 'LONG'][now + 1]}</td>"
-                        f"<td>{a:.0f}</td><td>{status}</td></tr>")
+                        f"<td>{_when(since)}</td><td>{a:.0f}</td><td>{status}</td></tr>")
 
     mkt = "".join(f"<tr><td>{c}</td><td>{d.close.iloc[-1]:,.2f}</td><td class='{_cls(d.close.iloc[-1] / d.close.iloc[-25] - 1)}'>"
                   f"{d.close.iloc[-1] / d.close.iloc[-25] - 1:+.2%}</td><td>{d.funding.iloc[-24:].sum() * 365:+.1%}</td></tr>"
@@ -69,13 +75,21 @@ def render(state, h1, sig, cfg):
     ev_rows = []
     for e in events.tail(25).iloc[::-1].itertuples() if len(events) else []:
         pnl = getattr(e, "pnl", float("nan"))
-        ev_rows.append(f"<tr><td>{str(e.ts)[:16]}</td><td>{e.event.upper()}</td><td>{e.leg}</td>"
+        ev_rows.append(f"<tr><td>{_when(e.ts)}</td><td>{e.event.upper()}</td><td>{e.leg}</td>"
                        f"<td class='{_cls(e.side)}'>{'LONG' if e.side > 0 else 'SHORT'}</td><td>{e.px:,.2f}</td>"
                        f"<td>{getattr(e, 'why', '') if isinstance(getattr(e, 'why', ''), str) else ''}</td>"
                        f"<td class='{_cls(pnl) if pnl == pnl else ''}'>{_money(pnl) if pnl == pnl else ''}</td></tr>")
     ev_html = "".join(ev_rows) or "<tr><td colspan='7' class='muted'>No trades yet</td></tr>"
+    tr_rows = []
+    for e in closed.iloc[::-1].itertuples() if len(closed) else []:
+        held = pd.Timestamp(e.ts) - pd.Timestamp(e.entry_ts)
+        ep = getattr(e, "entry_px", float("nan"))
+        tr_rows.append(f"<tr><td>{_when(e.entry_ts)}</td><td>{_when(e.ts)}</td><td>{held.total_seconds() / 86400:.1f}d</td>"
+                       f"<td>{e.leg.split('|')[0]}</td><td>{e.leg.split('|')[1]}</td><td class='{_cls(e.side)}'>{'LONG' if e.side > 0 else 'SHORT'}</td>"
+                       f"<td>{f'{ep:,.2f}' if ep == ep else ''}</td><td>{e.px:,.2f}</td><td>{e.why}</td><td class='{_cls(e.pnl)}'>{_money(e.pnl)}</td></tr>")
+    tr_html = "".join(tr_rows) or "<tr><td colspan='10' class='muted'>No closed trades yet</td></tr>"
 
-    data = dict(t=[str(x)[:16] for x in curve.ts], eq=[round(v, 2) for v in curve.equity],
+    data = dict(t=[_when(x) for x in curve.ts], eq=[round(v, 2) for v in curve.equity],
                 dd=[round(v, 2) for v in (curve.equity / curve.equity.cummax().clip(lower=start) - 1) * 100] if len(curve) else [])
     kpis = [("Equity", _money(eq_now), ""), ("P&L", f"{_money(eq_now - start)} ({eq_now / start - 1:+.2%})", _cls(eq_now - start)),
             ("Drawdown", f"{eq_now / peak - 1:.2%}", _cls(eq_now / peak - 1)), ("Exposure", f"{notional / eq_now:.2f}x", ""),
@@ -97,16 +111,17 @@ table{{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}} t
 .pos{{color:var(--pos)}} .neg{{color:var(--neg)}} .chart{{position:relative;height:260px}}
 </style></head><body><main>
 <h1>Futures paper bot <span class="muted" style="font-size:13px;font-weight:400">· PAPER · Kraken perps BTC/ETH/SOL · no real orders</span></h1>
-<div class="muted">Updated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · last closed bar {state['last_ts'][:16]} UTC · page refreshes every 5 min
+<div class="muted">Updated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · data up to {_when(state['last_ts'])} UTC · page refreshes every 5 min
 {' · <b class="neg">LIQUIDATED ' + state['liquidated'] + '</b>' if state.get('liquidated') else ''}</div>
 <div class="kpis">{kpi_html}</div>
 <h2>Equity</h2><div class="card"><div class="chart"><canvas id="eq"></canvas></div><div id="eqmsg" class="muted"></div></div>
 <h2>Drawdown from peak</h2><div class="card"><div class="chart" style="height:160px"><canvas id="dd"></canvas></div></div>
 <h2>Open positions</h2><div class="card"><table><tr><th>Coin</th><th>Strategy</th><th>Side</th><th>Opened (UTC)</th><th>Entry</th><th>Now</th><th>Size</th><th>Stop</th><th>Target</th><th>Time left</th><th>Unrealized</th></tr>{pos_html}</table></div>
-<h2>Signals</h2><div class="card"><table><tr><th>Coin</th><th>Strategy</th><th>Signal</th><th>Daily ADX</th><th>Status</th></tr>{''.join(sig_rows)}</table></div>
+<h2>Signals</h2><div class="card"><table><tr><th>Coin</th><th>Strategy</th><th>Signal</th><th>Since (UTC)</th><th>Daily ADX</th><th>Status</th></tr>{''.join(sig_rows)}</table></div>
 <h2>Market</h2><div class="card"><table><tr><th>Perp</th><th>Price</th><th>24h</th><th>Funding (annualized, last 24h; + = longs pay)</th></tr>{mkt}</table></div>
-<h2>Recent activity</h2><div class="card"><table><tr><th>Bar (UTC)</th><th>Event</th><th>Leg</th><th>Side</th><th>Price</th><th>Exit reason</th><th>P&amp;L</th></tr>{ev_html}</table></div>
-<p class="muted">Rules: 2% risk/trade · 5% stop · 15% target · max 7 days (re-entry if signal holds) · stop to breakeven after +7.5% · 10x cap.</p>
+<h2>Closed trades</h2><div class="card"><table><tr><th>Opened (UTC)</th><th>Closed (UTC)</th><th>Held</th><th>Coin</th><th>Strategy</th><th>Side</th><th>Entry</th><th>Exit</th><th>Reason</th><th>P&amp;L</th></tr>{tr_html}</table></div>
+<h2>Recent activity</h2><div class="card"><table><tr><th>Time (UTC)</th><th>Event</th><th>Leg</th><th>Side</th><th>Price</th><th>Exit reason</th><th>P&amp;L</th></tr>{ev_html}</table></div>
+<p class="muted">All times UTC, at the close of the hourly bar when the bot acted. Rules: 2% risk/trade · 5% stop · 15% target · max 7 days (re-entry if signal holds) · stop to breakeven after +7.5% · 10x cap.</p>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
