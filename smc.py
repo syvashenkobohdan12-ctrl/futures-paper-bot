@@ -52,7 +52,7 @@ def find_setups(df, k, max_bos, entry, tp, liq="last", fresh=True, ok=None, fvg_
                     stop = lo - buf * a[i]
                     risk = px - stop
                     if tp == "liq":           # nearest confirmed swing high above, not taken since it formed
-                        tgts = [h for j, h in highs if h > C[i] and H[j + 1:i + 1].max(initial=-np.inf) < h]
+                        tgts = [h for j, h in highs[-50:] if h > C[i] and H[j + 1:i + 1].max(initial=-np.inf) < h]
                         tgts = [h for h in sorted(tgts) if (h - px) / risk >= min_rr]
                         if not tgts:
                             break
@@ -69,7 +69,7 @@ def find_setups(df, k, max_bos, entry, tp, liq="last", fresh=True, ok=None, fvg_
             pool = [(j, lvl) for j, lvl in (lows[-1:] if liq == "last" else lows[-3:]) if j not in swept and L[i] < lvl < C[i]]
             if pool:
                 j, lvl = min(pool, key=lambda p: p[1])          # deepest pool taken
-                prior = [h for jj, h in highs if jj < j]        # BOS level: last swing high before that low
+                prior = [h for jj, h in highs[-50:] if jj < j]  # BOS level: last swing high before that low
                 swept.update(jj for jj, ll in lows[-3:] if L[i] < ll)
                 if prior:
                     sweep = (i, lvl, prior[-1])
@@ -122,18 +122,18 @@ def trend_up(df, n=50):
     return (df.close > e.reindex(df.index, method="ffill")).values
 
 
-def run(df, p):
+def run(df, p, cost=COST):
     out = []
     up = trend_up(df) if p.get("trend") else None
     for side, d in ((1, df), (-1, _flip(df))):
         ok = None if up is None else (up if side > 0 else ~up)
-        for t in simulate(d, find_setups(d, ok=ok, **p), p["hold"]):
+        for t in simulate(d, find_setups(d, ok=ok, **p), p["hold"], cost):
             t.update(side=side, entry=abs(t["entry"]), exit=abs(t["exit"]), stop=abs(t["stop"]), tgt=abs(t["tgt"]))
             out.append(t)
     return pd.DataFrame(out).sort_values("ts").reset_index(drop=True) if out else pd.DataFrame()
 
 
-def random_baseline(df, trades, hold, n=200, seed=0):
+def random_baseline(df, trades, hold, n=200, seed=0, cost=COST):
     """Same side, stop % and target % as each real trade, but entered at the open of a random bar:
     does the setup's timing add anything over the stop/target geometry alone?"""
     rng = np.random.default_rng(seed)
@@ -146,7 +146,7 @@ def random_baseline(df, trades, hold, n=200, seed=0):
             b = int(rng.integers(20, len(d) - hold))
             e = d.open.iloc[b]
             r = simulate(d, [dict(bar=b, entry=e, stop=e - t.risk_pct * abs(e),
-                                  tgt=e + abs(t.tgt - t.entry) / t.entry * abs(e), expiry=1)], hold)
+                                  tgt=e + abs(t.tgt - t.entry) / t.entry * abs(e), expiry=1)], hold, cost)
             rs += [r[0]["R"]] if r else []
         means.append(np.mean(rs) if rs else np.nan)
     return np.array(means)
