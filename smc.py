@@ -78,11 +78,12 @@ def find_setups(df, k, max_bos, entry, tp, liq="last", fresh=True, ok=None, fvg_
     return out
 
 
-def simulate(df, setups, hold, cost=COST, fees=None, be=None, through=0.0):
+def simulate(df, setups, hold, cost=COST, fees=None, be=None, through=0.0, trail=None):
     """One position or pending order at a time per side. Returns trade dicts with R and % net of costs.
     fees: (entry, target exit, stop/time exit) per side; default `cost` for all three.
     be: once price reaches be x risk in our favour, the stop moves to entry + 0.05% (from the next bar on).
-    through: the limit only fills if price trades this fraction beyond it (queue position)."""
+    through: the limit only fills if price trades this fraction beyond it (queue position).
+    trail: optional per-bar level (known at that close); a close below it exits at the close ("trail")."""
     O, H, L, C, F = (df[c].values for c in ("open", "high", "low", "close", "funding"))
     fe, ft, fs = fees or (cost, cost, cost)
     trades, free = [], 0
@@ -124,6 +125,9 @@ def simulate(df, setups, hold, cost=COST, fees=None, be=None, through=0.0):
                 break
             if H[i] >= tg and (i > f or C[i] >= e):   # fill bar: only trust the target if it closed back up
                 ex, why = (max(O[i], tg) if i > f else tg), "target"
+                break
+            if trail is not None and i > f and C[i] < trail[i]:
+                ex, why = C[i], "trail"
                 break
             if be is not None and H[i] >= px + be * (px - st0):
                 st = max(st, px + 0.0005 * abs(px))

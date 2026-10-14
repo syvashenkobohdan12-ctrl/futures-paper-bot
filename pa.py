@@ -18,6 +18,14 @@ import itertools, sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 import numpy as np, pandas as pd
+
+
+def _ar1(eps, phi):
+    out, x = np.empty(len(eps)), 0.0
+    for i, e in enumerate(eps):
+        x = phi * x + e
+        out[i] = x
+    return out
 import smc, smc_data
 from patterns import _pivots
 
@@ -182,7 +190,7 @@ def synth(seed, start="2020-01-01", end="2026-10-14"):
     rng = np.random.default_rng(seed)
     idx = pd.date_range(start, end, freq="h", inclusive="left")
     n = len(idx)
-    vol = 0.007 * np.exp(np.cumsum(rng.normal(0, 0.01, n)))
+    vol = 0.007 * np.exp(_ar1(rng.normal(0, 0.01, n), 0.998))   # mean-reverting log-vol: clusters, never explodes
     c = 100 * np.exp(np.cumsum(rng.normal(0, 1, n) * vol)); o = np.r_[c[0], c[:-1]]
     h = np.maximum(o, c) * np.exp(np.abs(rng.normal(0, 1, n)) * vol * .6)
     l = np.minimum(o, c) * np.exp(-np.abs(rng.normal(0, 1, n)) * vol * .6)

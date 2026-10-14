@@ -5,10 +5,11 @@ import sys, numpy as np, pandas as pd
 sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
 from concurrent.futures import ProcessPoolExecutor
 import smc_lab, smc
+from pa import _ar1
 def fake(seed, n=41928):
     rng = np.random.default_rng(seed)
     idx = pd.date_range("2022-01-01", periods=n, freq="h")
-    vol = 0.007 * np.exp(np.cumsum(rng.normal(0, 0.01, n)))            # slowly drifting volatility, like real markets
+    vol = 0.007 * np.exp(_ar1(rng.normal(0, 0.01, n), 0.998))   # mean-reverting log-vol: clusters, never explodes
     c = 100*np.exp(np.cumsum(rng.normal(0, 1, n) * vol)); o = np.r_[c[0], c[:-1]]
     h = np.maximum(o, c)*np.exp(np.abs(rng.normal(0, 1, n)) * vol * .6); l = np.minimum(o, c)*np.exp(-np.abs(rng.normal(0, 1, n)) * vol * .6)
     return pd.DataFrame(dict(open=o, high=h, low=l, close=c, volume=rng.lognormal(0, .5, n), funding=0.0), idx)
