@@ -1,0 +1,21 @@
+name: smc-backtest
+on:
+  push:
+    branches: [smc-backtest]
+  workflow_dispatch: {}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python smc.py ETHUSDT | tee smc_ETHUSDT.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smc-results
+          path: smc_ETHUSDT.txt
