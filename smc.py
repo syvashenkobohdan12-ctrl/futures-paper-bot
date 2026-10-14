@@ -186,9 +186,45 @@ def run_all(dfs, p):
     return pd.concat(parts).sort_values("ts").reset_index(drop=True) if parts else pd.DataFrame()
 
 
+# Picked by family on 2024-25 only: (k=3, fresh gap, fixed 2R) had the best mean train avgR of the
+# k x tp x fresh families, then the best train config inside it. 2026 stayed out of the choice.
+FINAL = dict(k=3, max_bos=12, entry="top", tp="2", liq="any", fresh=True, trend=False)
+
+
+def final_report(dfs):
+    from pathlib import Path
+    t = run_all(dfs, FINAL)
+    print("== FINAL:", fmt(FINAL), fmt(FIXED))
+    years = [("2024", ("2024-01-01", "2024-12-31 23:00")), ("2025", ("2025-01-01", "2025-12-31 23:00")),
+             ("2026 (unseen)", TEST), ("all", ("2000", "2099"))]
+    for nm, w in years:
+        s = window(t, w)
+        print(f"  {nm:14s} {fmt(summary(s))}")
+        if len(s) > 1:
+            print(f"  {'':14s} t-stat={s.R.mean() / (s.R.std() / np.sqrt(len(s))):.2f}  "
+                  f"avgR at 2x costs={(s.R - 2 * COST / s.risk_pct).mean():+.3f}")
+    for s in dfs:
+        ts = t[t.sym == s]
+        print(f"  {s}: 2024-25 {fmt(summary(window(ts, TRAIN)))}\n  {' ' * len(s)}  2026    {fmt(summary(window(ts, TEST)))}")
+    for nm, w in (("2024-25", TRAIN), ("2026", TEST)):
+        sub = window(t, w)
+        rb = np.nanmean([random_baseline(dfs[s], sub[sub.sym == s], FIXED["hold"], n=200) for s in dfs if (sub.sym == s).any()], axis=0)
+        print(f"  random entries, same stops/targets ({nm}, 200 runs): mean avgR={np.nanmean(rb):+.3f} "
+              f"p95={np.nanpercentile(rb, 95):+.3f}; strategy beats {np.mean(rb < sub.R.mean()):.0%}")
+    print("  exits:", t.why.value_counts().to_dict(), " median hours held:",
+          float((t.exit_ts - t.ts).dt.total_seconds().median() / 3600))
+    out = Path("smc_results"); out.mkdir(exist_ok=True)
+    t.to_csv(out / "final_trades.csv", index=False)
+    print(t.tail(20)[["ts", "sym", "side", "entry", "stop", "tgt", "exit", "why", "R"]].to_string())
+
+
 if __name__ == "__main__":
     import data
     from pathlib import Path
+    if "--final" in sys.argv:
+        sys.argv.remove("--final")
+        final_report({s: data.load(s) for s in (sys.argv[1:] or SYMS)})
+        sys.exit()
     syms = sys.argv[1:] or SYMS
     dfs = {s: data.load(s) for s in syms}
     for s, d in dfs.items():
