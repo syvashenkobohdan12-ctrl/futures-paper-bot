@@ -1,14 +1,10 @@
 {
  "go_live": "2026-10-14",
+ "rules": "simple",
  "last_day": "2026-10-13",
  "equity": 10000.0,
- "realized": 10000,
  "open": 0,
  "missing": [],
- "config": {
-  "exit": "fixed",
-  "sides": "long"
- },
  "equity_by_day": {
   "2026-10-13": 10000.0
  }
