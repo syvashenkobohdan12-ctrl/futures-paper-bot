@@ -30,6 +30,7 @@ SIDES = {"both": (1, -1), "long": (1,)}
 DEV = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSDT"]
 HOLD = ["ADAUSDT", "AVAXUSDT", "LINKUSDT", "SUIUSDT"]
 DEV_END = "2026-01-01"
+LIVE = dict(exit="fixed", sides="both")   # set from the DEV pick below; donchian_bot.py trades this
 OUT = Path("smc_results")
 
 
@@ -89,10 +90,11 @@ def choose(frames, say=print):
 def portfolio(t, risk=0.005, max_open=10):
     """Fixed-fractional sizing in trade-entry order; skip entries while max_open positions are open."""
     t = t.sort_values("ts").reset_index(drop=True)
-    events = sorted([(r.ts, 1, i) for i, r in t.iterrows()] + [(r.exit_ts, 0, i) for i, r in t.iterrows()])
+    # same timestamp: entries first, so a trade stopped out on its entry day still closes
+    events = sorted([(r.ts, 0, i) for i, r in t.iterrows()] + [(r.exit_ts, 1, i) for i, r in t.iterrows()])
     eq, open_, taken, curve = 1.0, {}, [], []
     for ts, kind, i in events:
-        if kind == 1:
+        if kind == 0:
             if len(open_) < max_open:
                 open_[i] = eq * risk
                 taken.append(i)
