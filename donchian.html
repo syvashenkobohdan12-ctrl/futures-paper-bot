@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="900"><title>Donchian paper sleeve</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--ink:#111;--mut:#777;--line:#e5e4de;--pos:#13804b;--neg:#c23b3b}
+@media (prefers-color-scheme:dark){:root{--bg:#151514;--card:#1e1e1c;--ink:#eee;--mut:#999;--line:#333;--pos:#3fbf7f;--neg:#ef6b6b}}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif} main{max-width:1100px;margin:auto;padding:16px}
+h1{font-size:20px;font-weight:600;margin:0} h2{font-size:15px;font-weight:600;margin:24px 0 8px} .muted{color:var(--mut)} a{color:inherit}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px} .lab{color:var(--mut);font-size:12px} .val{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap} th{color:var(--mut);font-weight:500;font-size:12px}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+</style></head><body><main>
+<h1>Donchian breakout sleeve <span class="muted" style="font-size:13px;font-weight:400">· PAPER · 10 Kraken perps · daily bars · <a href="index.html">main bot</a></span></h1>
+<div class="muted">Updated 2026-10-14 18:52 UTC · last closed day 2026-10-13
+</div>
+<div class="kpis"><div class='kpi'><div class='lab'>Equity</div><div class='val '>$10,000</div></div><div class='kpi'><div class='lab'>P&L</div><div class='val '>$0 (+0.00%)</div></div><div class='kpi'><div class='lab'>Open</div><div class='val '>0</div></div><div class='kpi'><div class='lab'>Closed</div><div class='val '>0</div></div><div class='kpi'><div class='lab'>Live since</div><div class='val '>2026-10-14</div></div></div>
+<h2>Open positions</h2><div class="card"><table><tr><th>Coin</th><th>Side</th><th>Opened</th><th>Entry</th><th>Last close</th><th>Stop</th><th>Target</th><th>Risked</th><th>Unrealized</th></tr><tr><td colspan='9' class='muted'>No open positions</td></tr></table></div>
+<h2>Distance to the breakout levels</h2><div class="card"><table><tr><th>Coin</th><th>Last close</th><th>20-day high</th><th>vs high</th><th>20-day low</th><th>vs low</th></tr><tr><td>BTC</td><td>8.31e+04</td><td>8.742e+04</td><td class='neg'>-4.9%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>ETH</td><td>2,496</td><td>2,778</td><td class='neg'>-10.1%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>SOL</td><td>106.8</td><td>125</td><td class='neg'>-14.6%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>XRP</td><td>1.365</td><td>1.63</td><td class='neg'>-16.3%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>BNB</td><td>740.7</td><td>810.1</td><td class='neg'>-8.6%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>DOGE</td><td>0.08434</td><td>0.09982</td><td class='neg'>-15.5%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>ADA</td><td>0.2357</td><td>0.2828</td><td class='neg'>-16.6%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>AVAX</td><td>10.22</td><td>12.02</td><td class='neg'>-14.9%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>LINK</td><td>12.88</td><td>15.78</td><td class='neg'>-18.4%</td><td colspan='2' class='muted'>longs only</td></tr><tr><td>SUI</td><td>1.047</td><td>1.295</td><td class='neg'>-19.1%</td><td colspan='2' class='muted'>longs only</td></tr></table></div>
+<h2>Closed trades</h2><div class="card"><table><tr><th>Coin</th><th>Side</th><th>Opened</th><th>Closed</th><th>Entry</th><th>Exit</th><th>Reason</th><th>R</th><th>P&amp;L</th></tr><tr><td colspan='9' class='muted'>No closed trades yet</td></tr></table></div>
+<p class="muted">Rules: daily close above the prior 20-day high → enter at the next day's open ·
+stop 2×ATR(14) · exit: 3R target or 72 days · 0.5% of equity risked per trade · max 10 open. Backtest 2020–2026 on Binance data: see the smc-backtest branch.</p>
+</main></body></html>
