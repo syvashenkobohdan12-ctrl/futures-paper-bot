@@ -14,6 +14,12 @@
 !/patterns.py
 !/waves.py
 !/test_backtest.py
+!/smc.py
+!/donchian.py
+!/donchian_bot.py
+!/donchian_state.json
+!/donchian_trades.csv
+!/donchian.html
 !/paper_state.json
 !/paper_events.csv
 !/paper_equity.csv
