@@ -135,7 +135,7 @@ def simulate(start, stop_pct, risk=RISK, max_lev=MAX_LEV, syms=SYMS, **exits):
     t = t.rename(columns={"why": "exit_why", "entry_ts": "entry", "ts": "exit"})
     t["side"] = np.where(t.side > 0, "long", "short")
     t["hours"] = (pd.to_datetime(t.exit) - pd.to_datetime(t.entry)).dt.total_seconds() / 3600
-    return pd.Series(curve, idx), t[["coin", "sleeve", "side", "entry", "exit", "hours", "pnl", "exit_why"]], max_used, state["liquidated"]
+    return pd.Series(curve, idx), t[["coin", "sleeve", "side", "entry", "exit", "hours", "pnl", "exit_why", "entry_px", "px"]], max_used, state["liquidated"]
 
 
 def report(eq, t, max_used, liq):
