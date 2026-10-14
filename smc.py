@@ -91,18 +91,30 @@ def simulate(df, setups, hold, cost=COST, fees=None, be=None, through=0.0):
         if b < free or b >= len(C):
             continue
         e, st, tg = su["entry"], su["stop"], su["tgt"]
+        kind = su.get("kind", "limit")       # limit: buy a dip to e; stop: buy a break of e; market: next open
         lim = e - through * abs(e)
         fill = None
         for i in range(b, min(b + su["expiry"], len(C))):
+            if kind == "market":
+                fill = (i, O[i])
+                break
+            if kind == "stop":
+                if L[i] <= st:                # invalidated before it triggered
+                    break
+                if H[i] >= e:
+                    fill = (i, max(O[i], e))
+                    break
+                continue
             if H[i] >= tg and L[i] > lim:     # ran to target without us: cancel
                 break
             if L[i] <= lim:
                 fill = (i, min(O[i], e))
                 break
-        if not fill:
-            free = i + 1
+        if not fill or fill[1] <= st or fill[1] >= tg:   # gapped past the stop or the target: no trade
+            free = (fill[0] if fill else i) + 1
             continue
         f, px = fill
+        fe_i = su.get("fee_in", fe)
         st0 = st
         why, ex, fund = "time", None, 0.0
         for i in range(f, min(f + hold, len(C))):
@@ -118,7 +130,7 @@ def simulate(df, setups, hold, cost=COST, fees=None, be=None, through=0.0):
         if ex is None:
             ex = C[i]
         dn = abs(px)
-        pct = (ex - px) / dn - fe - (ft if why == "target" else fs) - fund
+        pct = (ex - px) / dn - fe_i - (ft if why == "target" else fs) - fund
         trades.append(dict(ts=df.index[f], exit_ts=df.index[i], entry=px, exit=ex, stop=st0, tgt=tg, why=why,
                            pct=pct, R=pct / ((px - st0) / dn), risk_pct=(px - st0) / dn, setup_bar=b - 1))
         free = i + 1
