@@ -9,7 +9,15 @@ crypto,15m,LINKUSDT,171,-0.121
 crypto,15m,SOLUSDT,154,-0.111
 crypto,15m,SUIUSDT,148,-0.241
 crypto,15m,XRPUSDT,145,-0.062
+crypto,1d,ADAUSDT,5,-0.4
+crypto,1d,AVAXUSDT,2,-0.98
+crypto,1d,BTCUSDT,1,0.205
+crypto,1d,DOGEUSDT,1,1.582
+crypto,1d,ETHUSDT,4,0.488
+crypto,1d,LINKUSDT,3,-1.0
+crypto,1d,SOLUSDT,6,-0.369
 crypto,1d,SUIUSDT,1,0.223
+crypto,1d,XRPUSDT,2,-1.027
 crypto,1h,ADAUSDT,55,0.019
 crypto,1h,AVAXUSDT,51,0.047
 crypto,1h,BNBUSDT,64,-0.236
@@ -17,7 +25,9 @@ crypto,1h,BTCUSDT,29,0.212
 crypto,1h,DOGEUSDT,50,-0.072
 crypto,1h,ETHUSDT,26,-0.394
 crypto,1h,LINKUSDT,56,0.033
+crypto,1h,SOLUSDT,28,0.05
 crypto,1h,SUIUSDT,36,0.418
+crypto,1h,XRPUSDT,57,0.316
 crypto,4h,ADAUSDT,13,0.563
 crypto,4h,AVAXUSDT,15,0.307
 crypto,4h,BNBUSDT,10,-0.369
@@ -25,7 +35,9 @@ crypto,4h,BTCUSDT,9,-0.467
 crypto,4h,DOGEUSDT,13,0.015
 crypto,4h,ETHUSDT,10,-0.149
 crypto,4h,LINKUSDT,16,-0.121
+crypto,4h,SOLUSDT,9,0.346
 crypto,4h,SUIUSDT,7,-0.033
+crypto,4h,XRPUSDT,9,-0.26
 crypto,5m,ADAUSDT,514,-0.199
 crypto,5m,AVAXUSDT,528,-0.227
 crypto,5m,BNBUSDT,498,-0.566
@@ -65,9 +77,9 @@ stocks,1h,NVDA,10,0.166
 stocks,1h,QQQ,18,0.487
 stocks,1h,SPY,14,-0.402
 stocks,1h,TSLA,15,-0.303
-stocks,4h,AAPL,7,0.692
+stocks,4h,AAPL,7,0.685
 stocks,4h,AMD,5,-0.405
-stocks,4h,AMZN,6,-0.827
+stocks,4h,AMZN,6,-0.828
 stocks,4h,GOOGL,5,-0.857
 stocks,4h,META,1,2.249
 stocks,4h,MSFT,7,-0.309
