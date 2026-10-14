@@ -7,9 +7,18 @@ import pandas as pd, requests
 from data import BASE, CACHE, DEFAULT_FUNDING, _get_csv as _raw_csv
 
 
-def _get_csv(url):
-    """Older Binance files have no header row, newer ones do: number the columns so they line up when concatenated."""
-    df = _raw_csv(url)
+def _get_csv(url, tries=5):
+    """Older Binance files have no header row, newer ones do: number the columns so they line up when concatenated.
+    Retries network errors (runners occasionally fail DNS) with backoff."""
+    import time
+    for k in range(tries):
+        try:
+            df = _raw_csv(url)
+            break
+        except requests.exceptions.RequestException:
+            if k == tries - 1:
+                raise
+            time.sleep(2 ** k)
     if df is not None:
         df.columns = range(df.shape[1])
     return df
