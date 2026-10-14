@@ -7,7 +7,7 @@
    untaken confirmed swing high (needs >= min_rr) or a fixed R multiple; time stop after `hold` bars.
 Fills: limit/stop/target fill at their own prices (gap-throughs at the open); a bar that touches both
 stop and target, or fills and stops on the same bar, counts as the stop. Costs: COST per side + funding.
-Usage: python smc.py [SYMBOL]   (default ETHUSDT)"""
+Usage: python smc.py [SYMBOL ...]   (default BTCUSDT ETHUSDT SOLUSDT, pooled)"""
 import itertools, sys
 import numpy as np, pandas as pd
 from strategies import atr
@@ -24,8 +24,10 @@ def _flip(df):
     return pd.DataFrame(dict(open=-df.open, high=-df.low, low=-df.high, close=-df.close, funding=-df.funding), df.index)
 
 
-def find_setups(df, k, max_bos, entry, tp, fvg_min=0.25, buf=0.1, min_rr=1.5, expiry=24, **_):
-    """Long setups only. Returns dicts with the bar the order goes live (after the BOS close) and its levels."""
+def find_setups(df, k, max_bos, entry, tp, liq="last", fresh=True, ok=None, fvg_min=0.25, buf=0.1, min_rr=1.5, expiry=24, **_):
+    """Long setups only. Returns dicts with the bar the order goes live (after the BOS close) and its levels.
+    liq: "last" = only the latest swing low counts as liquidity; "any" = any of the last 3 not yet taken.
+    fresh: the gap must be untouched between its candle and the BOS. ok: optional bool per bar (trend filter)."""
     O, H, L, C = (df[c].values for c in ("open", "high", "low", "close"))
     a = atr(df, 14).values
     ph, pl = _pivots(df, k)
@@ -44,7 +46,7 @@ def find_setups(df, k, max_bos, entry, tp, fvg_min=0.25, buf=0.1, min_rr=1.5, ex
                 lo = L[s:i + 1].min()
                 for t in range(i, s + 1, -1):   # most recent gap first
                     bot, top = H[t - 2], L[t]
-                    if top - bot < fvg_min * a[i] or (t < i and L[t + 1:i + 1].min() <= top):
+                    if top - bot < fvg_min * a[i] or (fresh and t < i and L[t + 1:i + 1].min() <= top):
                         continue
                     px = top if entry == "top" else (top + bot) / 2
                     stop = lo - buf * a[i]
@@ -57,15 +59,20 @@ def find_setups(df, k, max_bos, entry, tp, fvg_min=0.25, buf=0.1, min_rr=1.5, ex
                         tgt = tgts[0]
                     else:
                         tgt = px + float(tp) * risk
-                    out.append(dict(bar=i + 1, entry=px, stop=stop, tgt=tgt, expiry=expiry))
+                    if ok is None or ok[i]:
+                        out.append(dict(bar=i + 1, entry=px, stop=stop, tgt=tgt, expiry=expiry))
                     break
                 continue
+        for j, lvl in lows[-3:]:              # a low closed through is spent, not liquidity any more
+            if C[i] < lvl: swept.add(j)
         if not sweep and lows:
-            j, lvl = lows[-1]
-            prior = [h for jj, h in highs if jj < j]   # BOS level: last confirmed swing high before the liquidity low
-            if j not in swept and prior and L[i] < lvl < C[i]:
-                swept.add(j)
-                sweep = (i, lvl, prior[-1])
+            pool = [(j, lvl) for j, lvl in (lows[-1:] if liq == "last" else lows[-3:]) if j not in swept and L[i] < lvl < C[i]]
+            if pool:
+                j, lvl = min(pool, key=lambda p: p[1])          # deepest pool taken
+                prior = [h for jj, h in highs if jj < j]        # BOS level: last swing high before that low
+                swept.update(jj for jj, ll in lows[-3:] if L[i] < ll)
+                if prior:
+                    sweep = (i, lvl, prior[-1])
     return out
 
 
@@ -108,10 +115,19 @@ def simulate(df, setups, hold, cost=COST):
     return trades
 
 
+def trend_up(df, n=50):
+    """4h EMA(n) of closes, using only 4h bars that have fully closed; True where the 1h close is above it."""
+    c4 = df.close.resample("4h").last()
+    e = c4.ewm(span=n, adjust=False).mean().shift(1)            # bar labelled 00:00 is known from 04:00 on
+    return (df.close > e.reindex(df.index, method="ffill")).values
+
+
 def run(df, p):
     out = []
+    up = trend_up(df) if p.get("trend") else None
     for side, d in ((1, df), (-1, _flip(df))):
-        for t in simulate(d, find_setups(d, **p), p["hold"]):
+        ok = None if up is None else (up if side > 0 else ~up)
+        for t in simulate(d, find_setups(d, ok=ok, **p), p["hold"]):
             t.update(side=side, entry=abs(t["entry"]), exit=abs(t["exit"]), stop=abs(t["stop"]), tgt=abs(t["tgt"]))
             out.append(t)
     return pd.DataFrame(out).sort_values("ts").reset_index(drop=True) if out else pd.DataFrame()
@@ -147,44 +163,68 @@ def summary(t):
                 stop_med=t.risk_pct.median(), longs=int((t.side > 0).sum()), shorts=int((t.side < 0).sum()))
 
 
-GRID = dict(k=[3, 5, 8], max_bos=[12, 24], entry=["top", "mid"], tp=["liq", "2", "3"])
-DEFAULT = dict(k=5, max_bos=24, entry="mid", tp="liq")   # chosen before looking at results
+GRID = dict(k=[3, 5], max_bos=[12, 24], entry=["top", "mid"], tp=["liq", "2"],
+            liq=["last", "any"], fresh=[True, False], trend=[False, True])
+SYMS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+MIN_TRAIN = 60                       # pooled train trades needed before a config can be picked
 
 
 def fmt(d):
     return " ".join(f"{k}={v:.3f}" if isinstance(v, float) else f"{k}={v}" for k, v in d.items())
 
 
+def window(t, w):
+    return t[(t.ts >= w[0]) & (t.ts <= w[1])] if len(t) else t
+
+
+def run_all(dfs, p):
+    parts = []
+    for sym, df in dfs.items():
+        t = run(df, dict(p, **FIXED))
+        if len(t):
+            parts.append(t.assign(sym=sym))
+    return pd.concat(parts).sort_values("ts").reset_index(drop=True) if parts else pd.DataFrame()
+
+
 if __name__ == "__main__":
     import data
-    sym = sys.argv[1] if len(sys.argv) > 1 else "ETHUSDT"
-    df = data.load(sym)
-    print(sym, df.index[0], "->", df.index[-1], len(df), "bars; train", TRAIN, "test", TEST)
+    from pathlib import Path
+    syms = sys.argv[1:] or SYMS
+    dfs = {s: data.load(s) for s in syms}
+    for s, d in dfs.items():
+        print(s, d.index[0], "->", d.index[-1], len(d), "bars")
     rows = []
     for vals in itertools.product(*GRID.values()):
-        p = dict(zip(GRID, vals), **FIXED)
-        t = run(df, p)
-        tr = t[(t.ts >= TRAIN[0]) & (t.ts <= TRAIN[1])] if len(t) else t
-        te = t[t.ts >= TEST[0]] if len(t) else t
-        rows.append((dict(zip(GRID, vals)), summary(tr), summary(te), t))
-    print("\n== grid (train 2024-25 | test 2026) ==")
-    for p, a, b, _ in sorted(rows, key=lambda r: -r[1].get("avgR", -9)):
-        print(f"{fmt(p):38s} | train n={a.get('n',0):4d} win={a.get('win',0):.2f} avgR={a.get('avgR',0):+.3f} "
+        p = dict(zip(GRID, vals))
+        t = run_all(dfs, p)
+        rows.append((p, summary(window(t, TRAIN)), summary(window(t, TEST)), t))
+    print(f"\n== {len(rows)} configs, pooled {'+'.join(syms)}: train 2024-25 | test 2026 (sorted by train avgR) ==")
+    for p, a, b, _ in sorted(rows, key=lambda r: -r[1].get("avgR", -9))[:25]:
+        print(f"{fmt(p):70s} | train n={a.get('n',0):4d} win={a.get('win',0):.2f} avgR={a.get('avgR',0):+.3f} "
               f"| test n={b.get('n',0):4d} win={b.get('win',0):.2f} avgR={b.get('avgR',0):+.3f}")
-    best = max((r for r in rows if r[1].get("n", 0) >= 30), key=lambda r: r[1]["avgR"])
-    for label, r in (("DEFAULT (pre-chosen)", next(r for r in rows if r[0] == DEFAULT)), ("BEST ON TRAIN", best)):
-        p, a, b, t = r
-        print(f"\n== {label}: {fmt(p)} {fmt(FIXED)}")
-        print("  train:", fmt(a))
-        print("  test: ", fmt(b))
-        print("  all:  ", fmt(summary(t)))
-        print("  exits:", t.why.value_counts().to_dict())
-        for nm, w in (("train", TRAIN), ("test", (TEST[0], "2099"))):
-            s = t[(t.ts >= w[0]) & (t.ts <= w[1])]
-            if len(s):
-                rb = random_baseline(df, s, FIXED["hold"])
-                print(f"  random-entry baseline ({nm}, same stops/targets, 200 runs): mean avgR={np.nanmean(rb):+.3f} "
-                      f"p95={np.nanpercentile(rb, 95):+.3f}; strategy beats {np.mean(rb < s.R.mean()):.0%} of runs")
-    print("\n== last 15 trades (default) ==")
-    t = next(r for r in rows if r[0] == DEFAULT)[3]
-    print(t.tail(15)[["ts", "side", "entry", "stop", "tgt", "exit", "why", "R"]].to_string())
+    print("\n== each rule variant, averaged over the core grid (how much does the idea help on its own?) ==")
+    for key in ("liq", "fresh", "trend"):
+        for v in GRID[key]:
+            sel = [r for r in rows if r[0][key] == v]
+            tr = np.mean([r[1].get("avgR", np.nan) for r in sel]); te = np.mean([r[2].get("avgR", np.nan) for r in sel])
+            print(f"  {key}={v!s:5s}: mean train avgR={tr:+.3f}  mean test avgR={te:+.3f}  "
+                  f"test positive in {np.mean([r[2].get('avgR', -1) > 0 for r in sel]):.0%} of configs")
+    pos_tr = np.mean([r[1].get("avgR", -1) > 0 for r in rows]); pos_te = np.mean([r[2].get("avgR", -1) > 0 for r in rows])
+    print(f"  all configs: train positive {pos_tr:.0%}, test positive {pos_te:.0%}")
+    best = max((r for r in rows if r[1].get("n", 0) >= MIN_TRAIN), key=lambda r: r[1]["avgR"])
+    p, a, b, t = best
+    print(f"\n== PICKED ON TRAIN ONLY (n>={MIN_TRAIN}): {fmt(p)} {fmt(FIXED)}")
+    print("  train:", fmt(a)); print("  test: ", fmt(b))
+    for s in syms:
+        ts = t[t.sym == s]
+        print(f"  {s}: train {fmt(summary(window(ts, TRAIN)))}\n  {' ' * len(s)}  test  {fmt(summary(window(ts, TEST)))}")
+    print("  exits train:", window(t, TRAIN).why.value_counts().to_dict(), " test:", window(t, TEST).why.value_counts().to_dict())
+    for nm, w in (("train", TRAIN), ("test", TEST)):
+        sub = window(t, w)
+        rb = np.nanmean([random_baseline(dfs[s], sub[sub.sym == s], FIXED["hold"], n=100) for s in syms if (sub.sym == s).any()], axis=0)
+        print(f"  random-entry baseline ({nm}, same stops/targets, 100 runs): mean avgR={np.nanmean(rb):+.3f} "
+              f"p95={np.nanpercentile(rb, 95):+.3f}; strategy beats {np.mean(rb < sub.R.mean()):.0%} of runs")
+    out = Path("smc_results"); out.mkdir(exist_ok=True)
+    t.assign(**{k: str(v) for k, v in p.items()}).to_csv(out / "picked_trades.csv", index=False)
+    pd.DataFrame([dict(**r[0], **{f"train_{k}": v for k, v in r[1].items()}, **{f"test_{k}": v for k, v in r[2].items()})
+                  for r in rows]).to_csv(out / "grid.csv", index=False)
