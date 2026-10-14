@@ -30,7 +30,7 @@ SIDES = {"both": (1, -1), "long": (1,)}
 DEV = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSDT"]
 HOLD = ["ADAUSDT", "AVAXUSDT", "LINKUSDT", "SUIUSDT"]
 DEV_END = "2026-01-01"
-LIVE = dict(exit="fixed", sides="both")   # set from the DEV pick below; donchian_bot.py trades this
+LIVE = dict(exit="fixed", sides="long")   # the DEV pick (smc_results/donchian_report.txt); donchian_bot.py trades this
 OUT = Path("smc_results")
 
 
