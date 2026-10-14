@@ -21,7 +21,8 @@ FIXED = dict(expiry=24, hold=72, min_rr=1.5, buf=0.1, fvg_min=0.25)
 
 def _flip(df):
     """Mirror prices so the long logic trades shorts: swing highs become swing lows and so on."""
-    return pd.DataFrame(dict(open=-df.open, high=-df.low, low=-df.high, close=-df.close, funding=-df.funding), df.index)
+    return pd.DataFrame(dict(open=-df.open, high=-df.low, low=-df.high, close=-df.close, funding=-df.funding,
+                             volume=df.get("volume", 0.0)), df.index)
 
 
 def find_setups(df, k, max_bos, entry, tp, liq="last", fresh=True, ok=None, fvg_min=0.25, buf=0.1, min_rr=1.5, expiry=24, **_):
@@ -59,8 +60,9 @@ def find_setups(df, k, max_bos, entry, tp, liq="last", fresh=True, ok=None, fvg_
                         tgt = tgts[0]
                     else:
                         tgt = px + float(tp) * risk
-                    if ok is None or ok[i]:
-                        out.append(dict(bar=i + 1, entry=px, stop=stop, tgt=tgt, expiry=expiry))
+                    if ok is None or ok[i]:   # features describe the setup at the BOS close (bar i), for filters
+                        out.append(dict(bar=i + 1, entry=px, stop=stop, tgt=tgt, expiry=expiry, sweep_bar=s,
+                                        depth=(lvl - lo) / a[i], gap=(top - bot) / a[i], body=abs(C[i] - O[i]) / a[i]))
                     break
                 continue
         for j, lvl in lows[-3:]:              # a low closed through is spent, not liquidity any more
@@ -76,41 +78,49 @@ def find_setups(df, k, max_bos, entry, tp, liq="last", fresh=True, ok=None, fvg_
     return out
 
 
-def simulate(df, setups, hold, cost=COST):
-    """One position or pending order at a time per side. Returns trade dicts with R and % net of costs."""
+def simulate(df, setups, hold, cost=COST, fees=None, be=None, through=0.0):
+    """One position or pending order at a time per side. Returns trade dicts with R and % net of costs.
+    fees: (entry, target exit, stop/time exit) per side; default `cost` for all three.
+    be: once price reaches be x risk in our favour, the stop moves to entry + 0.05% (from the next bar on).
+    through: the limit only fills if price trades this fraction beyond it (queue position)."""
     O, H, L, C, F = (df[c].values for c in ("open", "high", "low", "close", "funding"))
+    fe, ft, fs = fees or (cost, cost, cost)
     trades, free = [], 0
     for su in setups:
         b = su["bar"]
         if b < free or b >= len(C):
             continue
         e, st, tg = su["entry"], su["stop"], su["tgt"]
+        lim = e - through * abs(e)
         fill = None
         for i in range(b, min(b + su["expiry"], len(C))):
-            if H[i] >= tg and L[i] > e:       # ran to target without us: cancel
+            if H[i] >= tg and L[i] > lim:     # ran to target without us: cancel
                 break
-            if L[i] <= e:
+            if L[i] <= lim:
                 fill = (i, min(O[i], e))
                 break
         if not fill:
             free = i + 1
             continue
         f, px = fill
+        st0 = st
         why, ex, fund = "time", None, 0.0
         for i in range(f, min(f + hold, len(C))):
             if i > f: fund += F[i]
             if L[i] <= st:
-                ex, why = (min(O[i], st) if i > f else st), "stop"
+                ex, why = (min(O[i], st) if i > f else st), ("stop" if st < px else "breakeven")
                 break
             if H[i] >= tg and (i > f or C[i] >= e):   # fill bar: only trust the target if it closed back up
                 ex, why = (max(O[i], tg) if i > f else tg), "target"
                 break
+            if be is not None and H[i] >= px + be * (px - st0):
+                st = max(st, px + 0.0005 * abs(px))
         if ex is None:
             ex = C[i]
         dn = abs(px)
-        pct = (ex - px) / dn - 2 * cost - fund
-        trades.append(dict(ts=df.index[f], exit_ts=df.index[i], entry=px, exit=ex, stop=st, tgt=tg, why=why,
-                           pct=pct, R=pct / ((px - st) / dn), risk_pct=(px - st) / dn))
+        pct = (ex - px) / dn - fe - (ft if why == "target" else fs) - fund
+        trades.append(dict(ts=df.index[f], exit_ts=df.index[i], entry=px, exit=ex, stop=st0, tgt=tg, why=why,
+                           pct=pct, R=pct / ((px - st0) / dn), risk_pct=(px - st0) / dn, setup_bar=b - 1))
         free = i + 1
     return trades
 
@@ -133,11 +143,15 @@ def run(df, p, cost=COST):
     return pd.DataFrame(out).sort_values("ts").reset_index(drop=True) if out else pd.DataFrame()
 
 
-def random_baseline(df, trades, hold, n=200, seed=0, cost=COST):
+def random_baseline(df, trades, hold, n=200, seed=0, cost=COST, **sim):
     """Same side, stop % and target % as each real trade, but entered at the open of a random bar:
-    does the setup's timing add anything over the stop/target geometry alone?"""
+    does the setup's timing add anything over the stop/target geometry alone? `sim` passes exit/fee options
+    (be, fees) through so the comparison uses the same exits; market entries keep `cost` as their entry fee."""
     rng = np.random.default_rng(seed)
     flipped = _flip(df)
+    if "fees" in sim:
+        sim = dict(sim, fees=(cost,) + tuple(sim["fees"][1:]))
+    sim.pop("through", None)
     means = []
     for _ in range(n):
         rs = []
@@ -146,7 +160,7 @@ def random_baseline(df, trades, hold, n=200, seed=0, cost=COST):
             b = int(rng.integers(20, len(d) - hold))
             e = d.open.iloc[b]
             r = simulate(d, [dict(bar=b, entry=e, stop=e - t.risk_pct * abs(e),
-                                  tgt=e + abs(t.tgt - t.entry) / t.entry * abs(e), expiry=1)], hold, cost)
+                                  tgt=e + abs(t.tgt - t.entry) / abs(t.entry) * abs(e), expiry=1)], hold, cost, **sim)
             rs += [r[0]["R"]] if r else []
         means.append(np.mean(rs) if rs else np.nan)
     return np.array(means)
