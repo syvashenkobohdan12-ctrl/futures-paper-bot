@@ -1,0 +1,52 @@
+BTCUSDT 2024-01-01 00:00:00 -> 2026-10-13 23:00:00 24408 bars
+ETHUSDT 2024-01-01 00:00:00 -> 2026-10-13 23:00:00 24408 bars
+SOLUSDT 2024-01-01 00:00:00 -> 2026-10-13 23:00:00 24408 bars
+
+== 128 configs, pooled BTCUSDT+ETHUSDT+SOLUSDT: train 2024-25 | test 2026 (sorted by train avgR) ==
+k=3 max_bos=12 entry=top tp=liq liq=any fresh=True trend=False         | train n=  55 win=0.51 avgR=+0.382 | test n=  30 win=0.37 avgR=-0.122
+k=3 max_bos=12 entry=top tp=2 liq=any fresh=True trend=False           | train n=  58 win=0.52 avgR=+0.331 | test n=  30 win=0.43 avgR=+0.121
+k=3 max_bos=24 entry=top tp=liq liq=any fresh=True trend=False         | train n=  80 win=0.50 avgR=+0.327 | test n=  45 win=0.36 avgR=-0.140
+k=5 max_bos=12 entry=mid tp=2 liq=any fresh=True trend=False           | train n=  23 win=0.48 avgR=+0.304 | test n=  11 win=0.45 avgR=+0.149
+k=3 max_bos=12 entry=top tp=liq liq=last fresh=True trend=False        | train n=  41 win=0.46 avgR=+0.303 | test n=  22 win=0.36 avgR=-0.157
+k=3 max_bos=12 entry=mid tp=2 liq=any fresh=True trend=False           | train n=  47 win=0.49 avgR=+0.298 | test n=  23 win=0.43 avgR=+0.177
+k=3 max_bos=24 entry=mid tp=2 liq=any fresh=True trend=False           | train n=  69 win=0.49 avgR=+0.293 | test n=  36 win=0.42 avgR=+0.061
+k=3 max_bos=24 entry=mid tp=liq liq=any fresh=True trend=False         | train n=  68 win=0.46 avgR=+0.286 | test n=  39 win=0.36 avgR=-0.236
+k=3 max_bos=24 entry=mid tp=2 liq=any fresh=True trend=True            | train n=  49 win=0.49 avgR=+0.270 | test n=  30 win=0.47 avgR=+0.252
+k=3 max_bos=12 entry=mid tp=liq liq=any fresh=True trend=False         | train n=  46 win=0.46 avgR=+0.270 | test n=  24 win=0.38 avgR=-0.165
+k=3 max_bos=24 entry=top tp=2 liq=any fresh=True trend=False           | train n=  85 win=0.49 avgR=+0.268 | test n=  44 win=0.43 avgR=+0.101
+k=3 max_bos=12 entry=top tp=2 liq=last fresh=True trend=False          | train n=  43 win=0.49 avgR=+0.267 | test n=  22 win=0.45 avgR=+0.147
+k=3 max_bos=24 entry=mid tp=liq liq=any fresh=True trend=True          | train n=  48 win=0.46 avgR=+0.232 | test n=  33 win=0.39 avgR=-0.116
+k=3 max_bos=24 entry=top tp=liq liq=any fresh=True trend=True          | train n=  54 win=0.50 avgR=+0.230 | test n=  39 win=0.38 avgR=-0.030
+k=3 max_bos=12 entry=mid tp=2 liq=last fresh=True trend=False          | train n=  36 win=0.47 avgR=+0.222 | test n=  15 win=0.47 avgR=+0.201
+k=5 max_bos=12 entry=mid tp=liq liq=any fresh=True trend=False         | train n=  25 win=0.40 avgR=+0.222 | test n=  12 win=0.42 avgR=-0.213
+k=5 max_bos=24 entry=mid tp=liq liq=any fresh=True trend=True          | train n=  29 win=0.45 avgR=+0.220 | test n=  18 win=0.33 avgR=-0.328
+k=3 max_bos=24 entry=top tp=liq liq=last fresh=True trend=False        | train n=  59 win=0.44 avgR=+0.214 | test n=  32 win=0.38 avgR=-0.112
+k=5 max_bos=12 entry=top tp=2 liq=any fresh=True trend=False           | train n=  31 win=0.45 avgR=+0.200 | test n=  15 win=0.40 avgR=-0.059
+k=3 max_bos=12 entry=mid tp=2 liq=any fresh=True trend=True            | train n=  33 win=0.45 avgR=+0.194 | test n=  18 win=0.56 avgR=+0.527
+k=3 max_bos=12 entry=top tp=liq liq=any fresh=False trend=False        | train n=  75 win=0.45 avgR=+0.190 | test n=  38 win=0.39 avgR=-0.011
+k=3 max_bos=24 entry=top tp=2 liq=any fresh=True trend=True            | train n=  58 win=0.48 avgR=+0.189 | test n=  38 win=0.47 avgR=+0.251
+k=5 max_bos=12 entry=mid tp=2 liq=any fresh=True trend=True            | train n=  18 win=0.44 avgR=+0.188 | test n=   8 win=0.62 avgR=+0.601
+k=3 max_bos=12 entry=mid tp=liq liq=any fresh=False trend=False        | train n=  63 win=0.43 avgR=+0.187 | test n=  30 win=0.40 avgR=-0.067
+k=5 max_bos=12 entry=top tp=liq liq=any fresh=True trend=False         | train n=  31 win=0.42 avgR=+0.178 | test n=  17 win=0.35 avgR=-0.063
+
+== each rule variant, averaged over the core grid (how much does the idea help on its own?) ==
+  liq=last : mean train avgR=-0.005  mean test avgR=+0.049  test positive in 62% of configs
+  liq=any  : mean train avgR=+0.126  mean test avgR=+0.033  test positive in 52% of configs
+  fresh=True : mean train avgR=+0.115  mean test avgR=+0.053  test positive in 56% of configs
+  fresh=False: mean train avgR=+0.007  mean test avgR=+0.030  test positive in 58% of configs
+  trend=False: mean train avgR=+0.097  mean test avgR=-0.064  test positive in 34% of configs
+  trend=True : mean train avgR=+0.024  mean test avgR=+0.146  test positive in 80% of configs
+  all configs: train positive 71%, test positive 57%
+
+== PICKED ON TRAIN ONLY (n>=60): k=3 max_bos=24 entry=top tp=liq liq=any fresh=True trend=False expiry=24 hold=72 min_rr=1.500 buf=0.100 fvg_min=0.250
+  train: n=80 win=0.500 avgR=0.327 totR=26.184 pf=1.608 ret_1pct=0.287 maxdd_1pct=-0.078 stop_med=0.022 longs=36 shorts=44
+  test:  n=45 win=0.356 avgR=-0.140 totR=-6.282 pf=0.778 ret_1pct=-0.064 maxdd_1pct=-0.123 stop_med=0.017 longs=19 shorts=26
+  BTCUSDT: train n=25 win=0.360 avgR=-0.099 totR=-2.471 pf=0.861 ret_1pct=-0.027 maxdd_1pct=-0.035 stop_med=0.013 longs=13 shorts=12
+           test  n=11 win=0.455 avgR=0.055 totR=0.606 pf=1.116 ret_1pct=0.005 maxdd_1pct=-0.022 stop_med=0.012 longs=5 shorts=6
+  ETHUSDT: train n=30 win=0.633 avgR=0.673 totR=20.190 pf=2.709 ret_1pct=0.219 maxdd_1pct=-0.042 stop_med=0.022 longs=14 shorts=16
+           test  n=17 win=0.294 avgR=-0.178 totR=-3.027 pf=0.731 ret_1pct=-0.031 maxdd_1pct=-0.065 stop_med=0.014 longs=7 shorts=10
+  SOLUSDT: train n=25 win=0.480 avgR=0.339 totR=8.465 pf=1.627 ret_1pct=0.085 maxdd_1pct=-0.032 stop_med=0.025 longs=9 shorts=16
+           test  n=17 win=0.353 avgR=-0.227 totR=-3.860 pf=0.674 ret_1pct=-0.039 maxdd_1pct=-0.075 stop_med=0.020 longs=7 shorts=10
+  exits train: {'stop': 39, 'target': 31, 'time': 10}  test: {'stop': 24, 'target': 11, 'time': 10}
+  random-entry baseline (train, same stops/targets, 100 runs): mean avgR=-0.055 p95=+0.171; strategy beats 100% of runs
+  random-entry baseline (test, same stops/targets, 100 runs): mean avgR=-0.090 p95=+0.241; strategy beats 41% of runs
