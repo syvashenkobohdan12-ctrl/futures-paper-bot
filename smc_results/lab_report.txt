@@ -1,0 +1,76 @@
+loaded {'BTCUSDT': 41928, 'ETHUSDT': 41928, 'SOLUSDT': 41808, 'XRPUSDT': 41808, 'BNBUSDT': 41928, 'DOGEUSDT': 41928, 'ADAUSDT': 41928, 'AVAXUSDT': 41928, 'LINKUSDT': 41928, 'SUIUSDT': 30224}
+
+== 1. execution (base rules, 2R, no breakeven) ==
+bos12 taker                                                | dev n= 239 avgR=+0.015 t=+0.17 | hold_A n= 163 avgR=+0.046 t=+0.43 | hold_B n= 108 avgR=+0.231 t=+1.74
+bos12 maker                                                | dev n= 238 avgR=+0.043 t=+0.49 | hold_A n= 161 avgR=+0.069 t=+0.63 | hold_B n= 107 avgR=+0.252 t=+1.87
+bos24 taker                                                | dev n= 335 avgR=+0.002 t=+0.03 | hold_A n= 221 avgR=+0.085 t=+0.92 | hold_B n= 151 avgR=+0.099 t=+0.92
+bos24 maker                                                | dev n= 333 avgR=+0.024 t=+0.33 | hold_A n= 217 avgR=+0.092 t=+0.98 | hold_B n= 150 avgR=+0.122 t=+1.12
+-> picked on DEV: base=bos12 exec=maker
+
+== 2. exits ==
+tp=1.5 be=None                                             | dev n= 211 avgR=+0.065 t=+0.79 | hold_A n= 141 avgR=-0.012 t=-0.12 | hold_B n=  93 avgR=+0.196 t=+1.57
+tp=1.5 be=1.0                                              | dev n= 211 avgR=+0.081 t=+1.05 | hold_A n= 141 avgR=-0.013 t=-0.14 | hold_B n=  93 avgR=+0.175 t=+1.51
+tp=2.0 be=None                                             | dev n= 238 avgR=+0.043 t=+0.49 | hold_A n= 161 avgR=+0.069 t=+0.63 | hold_B n= 107 avgR=+0.252 t=+1.87
+tp=2.0 be=1.0                                              | dev n= 238 avgR=+0.057 t=+0.73 | hold_A n= 161 avgR=+0.032 t=+0.33 | hold_B n= 108 avgR=+0.266 t=+2.19
+tp=3.0 be=None                                             | dev n= 259 avgR=+0.103 t=+1.01 | hold_A n= 175 avgR=+0.088 t=+0.69 | hold_B n= 117 avgR=+0.188 t=+1.24
+tp=3.0 be=1.0                                              | dev n= 259 avgR=+0.041 t=+0.49 | hold_A n= 175 avgR=+0.125 t=+1.11 | hold_B n= 118 avgR=+0.240 t=+1.82
+-> picked on DEV: tp=1.5 be=1.0
+
+== 3. filters, one at a time on top of the above ==
+no filter                                                  | dev n= 211 avgR=+0.081 t=+1.05 | hold_A n= 141 avgR=-0.013 t=-0.14 | hold_B n=  93 avgR=+0.175 t=+1.51
++ trend_4h                                                 | dev n= 146 avgR=+0.121 t=+1.30 | hold_A n= 100 avgR=-0.080 t=-0.73 | hold_B n=  67 avgR=+0.101 t=+0.73
++ trend_1d                                                 | dev n= 113 avgR=-0.022 t=-0.21 | hold_A n=  77 avgR=-0.083 t=-0.67 | hold_B n=  52 avgR=+0.366 t=+2.42
++ killzone                                                 | dev n=  80 avgR=+0.078 t=+0.59 | hold_A n=  47 avgR=+0.179 t=+1.07 | hold_B n=  44 avgR=+0.213 t=+1.29
++ displace                                                 | dev n=  51 avgR=-0.031 t=-0.19 | hold_A n=  48 avgR=+0.259 t=+1.62 | hold_B n=  24 avgR=+0.359 t=+1.40
++ big_gap                                                  | dev n= 104 avgR=+0.173 t=+1.55 | hold_A n=  74 avgR=-0.037 t=-0.30 | hold_B n=  42 avgR=-0.137 t=-0.83
++ deep_sweep                                               | dev n=  93 avgR=+0.084 t=+0.71 | hold_A n=  68 avgR=+0.013 t=+0.10 | hold_B n=  50 avgR=+0.234 t=+1.48
++ vol_spike                                                | dev n= 102 avgR=+0.068 t=+0.62 | hold_A n=  68 avgR=-0.199 t=-1.58 | hold_B n=  51 avgR=+0.136 t=+0.86
++ adx_trend                                                | dev n= 122 avgR=+0.091 t=+0.91 | hold_A n=  67 avgR=+0.033 t=+0.25 | hold_B n=  54 avgR=+0.297 t=+1.96
++ adx_range                                                | dev n=  89 avgR=+0.067 t=+0.55 | hold_A n=  75 avgR=-0.069 t=-0.52 | hold_B n=  39 avgR=+0.005 t=+0.03
++ hi_vol                                                   | dev n= 109 avgR=+0.029 t=+0.28 | hold_A n=  60 avgR=+0.042 t=+0.30 | hold_B n=  38 avgR=+0.406 t=+2.24
++ lo_vol                                                   | dev n= 103 avgR=+0.123 t=+1.05 | hold_A n=  81 avgR=-0.053 t=-0.43 | hold_B n=  55 avgR=+0.015 t=+0.10
+
+== 3b. greedy (DEV t-stat, >= 150 DEV trades, stop when gain < 0.25) ==
+-> filters picked on DEV: none
+
+== 4. re-check exits with the filters ==
+tp=1.5 be=None                                             | dev n= 211 avgR=+0.065 t=+0.79 | hold_A n= 141 avgR=-0.012 t=-0.12 | hold_B n=  93 avgR=+0.196 t=+1.57
+tp=1.5 be=1.0                                              | dev n= 211 avgR=+0.081 t=+1.05 | hold_A n= 141 avgR=-0.013 t=-0.14 | hold_B n=  93 avgR=+0.175 t=+1.51
+tp=2.0 be=None                                             | dev n= 238 avgR=+0.043 t=+0.49 | hold_A n= 161 avgR=+0.069 t=+0.63 | hold_B n= 107 avgR=+0.252 t=+1.87
+tp=2.0 be=1.0                                              | dev n= 238 avgR=+0.057 t=+0.73 | hold_A n= 161 avgR=+0.032 t=+0.33 | hold_B n= 108 avgR=+0.266 t=+2.19
+tp=3.0 be=None                                             | dev n= 259 avgR=+0.103 t=+1.01 | hold_A n= 175 avgR=+0.088 t=+0.69 | hold_B n= 117 avgR=+0.188 t=+1.24
+tp=3.0 be=1.0                                              | dev n= 259 avgR=+0.041 t=+0.49 | hold_A n= 175 avgR=+0.125 t=+1.11 | hold_B n= 118 avgR=+0.240 t=+1.82
+
+== FINAL (chosen on DEV only): {'base': 'bos12', 'exec': 'maker', 'tp': 1.5, 'be': 1.0, 'filters': []}
+final                                                      | dev n= 211 avgR=+0.081 t=+1.05 | hold_A n= 141 avgR=-0.013 t=-0.14 | hold_B n=  93 avgR=+0.175 t=+1.51
+  dev: win=0.39 exits={'stop': 88, 'target': 75, 'breakeven': 33, 'time': 15} longs=112 shorts=99
+  hold_A: win=0.37 exits={'stop': 66, 'target': 44, 'breakeven': 19, 'time': 12} longs=78 shorts=63
+  hold_B: win=0.44 exits={'stop': 35, 'target': 34, 'breakeven': 14, 'time': 10} longs=48 shorts=45
+  by year:
+             count   mean
+ts   set                 
+2022 dev        53 -0.006
+     hold_A     27 -0.172
+2023 dev        47  0.118
+     hold_A     40 -0.116
+2024 dev        50  0.004
+     hold_A     41  0.132
+2025 dev        61  0.191
+     hold_A     33  0.063
+2026 hold_B     93  0.175
+  by coin:
+          count   mean
+sym                   
+ADAUSDT      51  0.028
+AVAXUSDT     47 -0.059
+BNBUSDT      53 -0.066
+BTCUSDT      39  0.011
+DOGEUSDT     44 -0.039
+ETHUSDT      38  0.147
+LINKUSDT     46  0.133
+SOLUSDT      46  0.195
+SUIUSDT      27  0.204
+XRPUSDT      54  0.211
+  random entries, same stops/targets (hold_A): mean avgR=-0.040 p95=+0.122 -> strategy beats 64%
+  random entries, same stops/targets (hold_B): mean avgR=-0.052 p95=+0.134 -> strategy beats 98%
+  all sets, 1% risk/trade: return=+33.3% maxDD=-16.3% trades/yr=94
