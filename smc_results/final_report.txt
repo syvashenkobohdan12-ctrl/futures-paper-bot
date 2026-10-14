@@ -1,0 +1,39 @@
+== FINAL: k=3 max_bos=12 entry=top tp=2 liq=any fresh=True trend=False expiry=24 hold=72 min_rr=1.500 buf=0.100 fvg_min=0.250
+  2024           n=29 win=0.448 avgR=0.113 totR=3.284 pf=1.190 ret_1pct=0.030 maxdd_1pct=-0.057 stop_med=0.025 longs=13 shorts=16
+                 t-stat=0.43  avgR at 2x costs=+0.041
+  2025           n=29 win=0.586 avgR=0.549 totR=15.922 pf=2.221 ret_1pct=0.169 maxdd_1pct=-0.028 stop_med=0.021 longs=14 shorts=15
+                 t-stat=2.04  avgR at 2x costs=+0.465
+  2026 (unseen)  n=30 win=0.433 avgR=0.121 totR=3.637 pf=1.212 ret_1pct=0.034 maxdd_1pct=-0.054 stop_med=0.017 longs=11 shorts=19
+                 t-stat=0.49  avgR at 2x costs=+0.027
+  all            n=88 win=0.489 avgR=0.260 totR=22.844 pf=1.481 ret_1pct=0.246 maxdd_1pct=-0.057 stop_med=0.020 longs=38 shorts=50
+                 t-stat=1.73  avgR at 2x costs=+0.176
+  BTCUSDT: 2024-25 n=16 win=0.438 avgR=0.107 totR=1.712 pf=1.172 ret_1pct=0.016 maxdd_1pct=-0.023 stop_med=0.016 longs=9 shorts=7
+           2026    n=8 win=0.625 avgR=0.617 totR=4.937 pf=2.822 ret_1pct=0.050 maxdd_1pct=-0.011 stop_med=0.015 longs=2 shorts=6
+  ETHUSDT: 2024-25 n=21 win=0.524 avgR=0.296 totR=6.214 pf=1.574 ret_1pct=0.062 maxdd_1pct=-0.042 stop_med=0.022 longs=10 shorts=11
+           2026    n=9 win=0.222 avgR=-0.412 totR=-3.712 pf=0.463 ret_1pct=-0.037 maxdd_1pct=-0.036 stop_med=0.014 longs=2 shorts=7
+  SOLUSDT: 2024-25 n=21 win=0.571 avgR=0.537 totR=11.282 pf=2.179 ret_1pct=0.117 maxdd_1pct=-0.032 stop_med=0.025 longs=8 shorts=13
+           2026    n=13 win=0.462 avgR=0.186 totR=2.412 pf=1.320 ret_1pct=0.023 maxdd_1pct=-0.063 stop_med=0.019 longs=7 shorts=6
+  random entries, same stops/targets (2024-25, 200 runs): mean avgR=-0.071 p95=+0.179; strategy beats 100%
+  random entries, same stops/targets (2026, 200 runs): mean avgR=-0.111 p95=+0.272; strategy beats 84%
+  exits: {'stop': 43, 'target': 32, 'time': 13}  median hours held: 20.5
+                    ts      sym  side     entry          stop           tgt          exit     why         R
+68 2026-03-29 03:00:00  SOLUSDT    -1     82.85     84.415826     79.718349     79.718349  target  1.905794
+69 2026-04-10 00:00:00  SOLUSDT     1     82.87     81.280791     86.048419     86.048419  target  1.921951
+70 2026-04-11 20:00:00  SOLUSDT     1     85.37     83.690540     88.728920     83.690540    stop -1.076248
+71 2026-05-03 09:00:00  SOLUSDT    -1     84.05     84.993947     82.162106     84.993947    stop -1.119904
+72 2026-05-04 06:00:00  SOLUSDT     1     84.70     83.236227     87.627547     83.236227    stop -1.086796
+73 2026-05-06 13:00:00  ETHUSDT     1   2383.28   2350.696201   2448.447598   2350.696201    stop -1.102400
+74 2026-05-18 13:00:00  SOLUSDT     1     84.93     83.951376     86.887249     83.951376    stop -1.121499
+75 2026-05-21 17:00:00  BTCUSDT    -1  77651.70  78216.618471  76521.863058  76521.863058  target  1.815307
+76 2026-05-27 08:00:00  ETHUSDT    -1   2089.00   2141.388071   1984.223857   1984.223857  target  1.947571
+77 2026-06-08 01:00:00  SOLUSDT     1     65.72     63.453259     70.253482     63.453259    stop -1.026284
+78 2026-06-22 00:00:00  SOLUSDT    -1     73.43     74.870238     70.549524     74.870238    stop -1.071378
+79 2026-06-22 00:00:00  ETHUSDT    -1   1723.96   1739.506642   1692.866716   1739.506642    stop -1.155245
+80 2026-07-11 13:00:00  SOLUSDT    -1     78.34     79.703556     75.612888     75.612888  target  1.925563
+81 2026-07-27 16:00:00  BTCUSDT    -1  64750.00  65755.675210  62738.649580  62738.649580  target  1.912651
+82 2026-07-31 11:00:00  BTCUSDT    -1  63950.00  65422.622052  61004.755896  62708.800000    time  0.805521
+83 2026-08-07 14:00:00  BTCUSDT     1  64768.50  64104.991327  66095.517345  64533.700000    time -0.545819
+84 2026-08-07 17:00:00  SOLUSDT     1     73.46     72.253399     75.873202     75.873202  target  1.903577
+85 2026-08-16 19:00:00  SOLUSDT    -1     75.26     75.710756     74.358489     74.358489  target  1.766250
+86 2026-09-02 13:00:00  ETHUSDT    -1   2399.16   2431.300901   2334.878198   2431.300901    stop -1.087668
+87 2026-10-06 02:00:00  ETHUSDT     1   2702.95   2675.576161   2757.697678   2675.576161    stop -1.167862
