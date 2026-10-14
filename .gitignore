@@ -14,8 +14,7 @@
 !/patterns.py
 !/waves.py
 !/test_backtest.py
-!/smc.py
-!/donchian.py
+!/simple.py
 !/donchian_bot.py
 !/donchian_state.json
 !/donchian_trades.csv
