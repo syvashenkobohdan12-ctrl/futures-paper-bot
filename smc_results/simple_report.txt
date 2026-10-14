@@ -1,0 +1,21 @@
+== simple: buy 20-day high close, sell 10-day low close, 10 coins equal weight, long only ==
+             strategy   buy&hold
+2020             +59%      +117%
+2021            +534%     +1448%
+2022             -19%       -68%
+2023             +90%      +137%
+2024             +92%      +142%
+2025              -8%       -34%
+2026              -8%       -15%
+per year         +61%       +69%
+worst DD         -34%       -76%
+sharpe           1.57       1.08
+
+trades 497 | won 42% | avg trade +12.0% | avg win +39.8% | avg loss -8.2% | median days held 13
+per coin avg trade: {'ADAUSDT': '+14.5%', 'AVAXUSDT': '+19.2%', 'BNBUSDT': '+11.5%', 'BTCUSDT': '+3.7%', 'DOGEUSDT': '+27.1%', 'ETHUSDT': '+6.2%', 'LINKUSDT': '+2.8%', 'SOLUSDT': '+22.4%', 'SUIUSDT': '+4.0%', 'XRPUSDT': '+12.9%'}
+
+neighbouring settings (per year / worst DD):
+  buy 10 / sell  5: +51% / -33% / sharpe 1.44
+  buy 20 / sell 10: +61% / -34% / sharpe 1.57
+  buy 30 / sell 15: +50% / -37% / sharpe 1.32
+  buy 55 / sell 20: +51% / -42% / sharpe 1.38
