@@ -1,0 +1,21 @@
+== exit/side variants (choice by DEV t-stat) ==
+fixed    both  | dev n= 394 R=+0.251 t=+2.86 | hold_A R=+0.180 | hold_B R=+0.244 | holdouts R=+0.198 t=+2.04
+fixed    long  | dev n= 247 R=+0.490 t=+4.07 | hold_A R=+0.294 | hold_B R=-0.047 | holdouts R=+0.200 t=+1.53
+trail10  both  | dev n= 340 R=+0.893 t=+2.88 | hold_A R=+0.770 | hold_B R=+0.144 | holdouts R=+0.584 t=+2.56
+trail10  long  | dev n= 172 R=+1.948 t=+3.26 | hold_A R=+1.628 | hold_B R=-0.093 | holdouts R=+1.051 t=+2.50
+trail20  both  | dev n= 267 R=+4.294 t=+1.60 | hold_A R=+1.301 | hold_B R=+0.227 | holdouts R=+0.958 t=+2.39
+trail20  long  | dev n= 134 R=+8.719 t=+1.63 | hold_A R=+2.764 | hold_B R=-0.082 | holdouts R=+1.717 t=+2.29
+
+-> picked on DEV: exit=fixed sides=long
+ts       2020    2021    2022    2023    2024    2025    2026
+count  56.000  79.000  43.000  74.000  92.000  46.000  54.000
+mean    0.952   0.728  -0.557   0.564   0.262   0.224  -0.047
+sym    ADAUSDT  AVAXUSDT  BNBUSDT  BTCUSDT  DOGEUSDT  ETHUSDT  LINKUSDT  SOLUSDT  SUIUSDT  XRPUSDT
+count   47.000    42.000   50.000   49.000    40.000   53.000    51.000   41.000   26.000   45.000
+mean     0.321     0.293    0.627    0.453     0.343    0.312     0.099    0.733    0.557   -0.009
+exits: {'stop': 277, 'target': 151, 'time': 16}  win: 0.369  median days held: 11.0
+risk 0.5% max_open 10: x2.04 (+11%/yr) maxDD -20.6% trades 444
+risk 1.0% max_open 10: x3.55 (+21%/yr) maxDD -37.7% trades 444
+risk 0.5% max_open 99: x2.04 (+11%/yr) maxDD -20.6% trades 444
+
+overlap with the live bot (monthly returns 2024+): correlation +0.24; live sharpe-ish 1.59, sleeve 0.34, 50/50 blend 1.49
