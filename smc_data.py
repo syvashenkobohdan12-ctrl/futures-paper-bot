@@ -4,7 +4,15 @@ Stocks: Alpaca IEX bars when ALPACA_PAPER_KEY_ID/_SECRET_KEY are set, else Yahoo
 (Yahoo only serves ~730 days of 1h and 60 days of 5m/15m, so those come back short)."""
 import datetime as dt, os
 import pandas as pd, requests
-from data import BASE, CACHE, DEFAULT_FUNDING, _get_csv
+from data import BASE, CACHE, DEFAULT_FUNDING, _get_csv as _raw_csv
+
+
+def _get_csv(url):
+    """Older Binance files have no header row, newer ones do: number the columns so they line up when concatenated."""
+    df = _raw_csv(url)
+    if df is not None:
+        df.columns = range(df.shape[1])
+    return df
 
 AGG = dict(open="first", high="max", low="min", close="last", volume="sum", funding="sum")
 START = {"5m": "2024-01-01", "15m": "2024-01-01", "1h": "2022-01-01", "4h": "2022-01-01", "1d": "2020-01-01"}
