@@ -1,0 +1,13 @@
+target=liq normal            | dev n= 1248 win=38% avgR=-0.102 t=-2.24 | holdout n= 1711 win=37% avgR=-0.113 t=-3.02 | stop median 0.88%
+target=liq REVERSED          | dev n= 1282 win=58% avgR=-0.134 t=-6.01 | holdout n= 1745 win=60% avgR=-0.112 t=-5.80 | stop median 1.65%
+target=2R normal             | dev n= 1292 win=37% avgR=-0.147 t=-4.17 | holdout n= 1819 win=37% avgR=-0.139 t=-4.68 | stop median 1.00%
+target=2R REVERSED           | dev n= 1332 win=59% avgR=-0.085 t=-4.80 | holdout n= 1858 win=60% avgR=-0.066 t=-4.46 | stop median 1.98%
+
+by year (avg R):
+  liq normal   {2024: '1085/-0.02', 2025: '1090/-0.13', 2026: '784/-0.20'}
+  liq REVERSED {2024: '1106/-0.13', 2025: '1114/-0.09', 2026: '807/-0.14'}
+  2R  normal   {2024: '1116/-0.10', 2025: '1136/-0.17', 2026: '859/-0.16'}
+  2R  REVERSED {2024: '1145/-0.08', 2025: '1162/-0.05', 2026: '883/-0.09'}
+
+exits: {'liq norm': {'stop': 1671, 'target': 890, 'trail': 398}, 'liq rev': {'target': 1668, 'stop': 949, 'trail': 410}, '2R norm': {'stop': 1694, 'trail': 746, 'target': 671}, '2R rev': {'target': 1698, 'trail': 765, 'stop': 727}}
+fees in R (median round trip): {'liq norm': 0.102, 'liq rev': 0.055, '2R norm': 0.09, '2R rev': 0.046}
