@@ -1,0 +1,30 @@
+== dip bounce: down >8% close -> buy, sell 1 day later ==
+all      trades  809 | won 58% | avg +1.96% | avg win +7.3% | avg loss -5.4% | worst -46.0%
+dev      trades  422 | won 58% | avg +2.46% | avg win +8.2% | avg loss -5.5% | worst -46.0%
+holdout  trades  387 | won 57% | avg +1.41% | avg win +6.4% | avg loss -5.2% | worst -19.5%
+
+by year:
+  2020  trades  112 | won 66% | avg +2.82% | avg win +6.8% | avg loss -4.9% | worst -41.9%
+  2021  trades  259 | won 59% | avg +3.86% | avg win +10.7% | avg loss -6.0% | worst -21.7%
+  2022  trades  168 | won 55% | avg +0.19% | avg win +5.9% | avg loss -6.7% | worst -46.0%
+  2023  trades   48 | won 46% | avg +0.67% | avg win +4.2% | avg loss -2.3% | worst -8.9%
+  2024  trades   86 | won 62% | avg +1.15% | avg win +5.8% | avg loss -6.3% | worst -14.6%
+  2025  trades  104 | won 53% | avg +0.11% | avg win +3.7% | avg loss -3.9% | worst -11.6%
+  2026  trades   32 | won 56% | avg +2.96% | avg win +7.9% | avg loss -3.4% | worst -13.0%
+
+by coin: {'ADAUSDT': '+2.19%', 'AVAXUSDT': '+0.22%', 'BNBUSDT': '+2.21%', 'BTCUSDT': '+1.94%', 'DOGEUSDT': '+6.39%', 'ETHUSDT': '+1.65%', 'LINKUSDT': '+1.79%', 'SOLUSDT': '+0.75%', 'SUIUSDT': '+1.24%', 'XRPUSDT': '+1.37%'}
+
+random days, same coins and count (200 runs): avg +0.14%, best run +1.03% -> strategy avg +1.96% beats 100%
+
+neighbouring settings (avg per trade / trades):
+  drop >5%: hold 1d +0.92% (2138) | hold 2d +1.42% (2138) | hold 3d +1.51% (2138)
+  drop >6%: hold 1d +1.11% (1554) | hold 2d +1.64% (1554) | hold 3d +1.77% (1554)
+  drop >8%: hold 1d +1.96% (809) | hold 2d +2.80% (809) | hold 3d +3.08% (809)
+  drop >10%: hold 1d +2.15% (438) | hold 2d +2.94% (438) | hold 3d +4.07% (438)
+  drop >12%: hold 1d +3.35% (255) | hold 2d +4.08% (255) | hold 3d +5.76% (255)
+
+account (10% per trade):
+  dip bounce  +23%/yr  worst DD -22%  sharpe 0.90  {2020: '+35%', 2021: '+141%', 2022: '-0%', 2023: '+3%', 2024: '+9%', 2025: '+1%', 2026: '+9%'}
+  breakout    +61%/yr  worst DD -34%  sharpe 1.57  {2020: '+59%', 2021: '+534%', 2022: '-19%', 2023: '+90%', 2024: '+92%', 2025: '-8%', 2026: '-8%'}
+  50/50 both  +43%/yr  worst DD -24%  sharpe 1.70  {2020: '+48%', 2021: '+312%', 2022: '-9%', 2023: '+42%', 2024: '+47%', 2025: '-3%', 2026: '+1%'}
+  correlation of daily returns dip vs breakout: +0.11
