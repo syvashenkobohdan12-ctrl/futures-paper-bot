@@ -110,7 +110,7 @@ h1{{font-size:20px;font-weight:600;margin:0}} h2{{font-size:15px;font-weight:600
 table{{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}} th,td{{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}} th{{color:var(--mut);font-weight:500;font-size:12px}}
 .pos{{color:var(--pos)}} .neg{{color:var(--neg)}} .chart{{position:relative;height:260px}}
 </style></head><body><main>
-<h1>Futures paper bot <span class="muted" style="font-size:13px;font-weight:400">· PAPER · Kraken perps BTC/ETH/SOL · no real orders · <a href="donchian.html" style="color:inherit">Donchian sleeve →</a></span></h1>
+<h1>Futures paper bot <span class="muted" style="font-size:13px;font-weight:400">· PAPER · Kraken perps BTC/ETH/SOL · no real orders · <a href="donchian.html" style="color:inherit">Breakout sleeve →</a> · <a href="dip.html" style="color:inherit">Dip sleeve →</a></span></h1>
 <div class="muted">Updated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · data up to {_when(state['last_ts'])} UTC · page refreshes every 5 min
 {' · <b class="neg">LIQUIDATED ' + state['liquidated'] + '</b>' if state.get('liquidated') else ''}</div>
 <div class="kpis">{kpi_html}</div>

@@ -16,6 +16,11 @@
 !/test_backtest.py
 !/simple.py
 !/donchian_bot.py
+!/dip_bot.py
+!/sleeves.py
+!/dip_state.json
+!/dip_trades.csv
+!/dip.html
 !/donchian_state.json
 !/donchian_trades.csv
 !/donchian.html

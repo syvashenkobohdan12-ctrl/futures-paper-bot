@@ -20,8 +20,8 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python live_bot.py
-      - name: Donchian paper sleeve (separate account; a failure here never blocks the main bot)
-        run: python donchian_bot.py
+      - name: Paper sleeves (breakout + dip; separate accounts; a failure here never blocks the main bot)
+        run: python sleeves.py
         continue-on-error: true
       - run: cp dashboard.html index.html    # GitHub Pages serves index.html at the site root
       - name: Save state back to the repo
@@ -29,7 +29,7 @@ jobs:
           git config user.name "paper-bot"
           git config user.email "paper-bot@users.noreply.github.com"
           git add -f paper_*.* dashboard.html index.html
-          for f in donchian_state.json donchian_trades.csv donchian.html; do [ -f "$f" ] && git add -f "$f" || true; done
+          for f in donchian_state.json donchian_trades.csv donchian.html dip_state.json dip_trades.csv dip.html; do [ -f "$f" ] && git add -f "$f" || true; done
           git diff --cached --quiet && exit 0
           git commit -q -m "paper bot run $(date -u +%Y-%m-%dT%H:%MZ)"
           for i in 1 2 3; do git pull -q --rebase && git push -q && exit 0; sleep 10; done

@@ -14,4 +14,12 @@ Two rules on daily closes, long only, 10 Kraken perps (BTC ETH SOL XRP BNB DOGE 
 
 Backtest 2020–2026 (Binance daily, fees + funding): +61%/yr, worst drawdown −34%, vs buy & hold +69%/yr and −76% (`simple.py`).
 `donchian_bot.py` runs in the hourly job, rebuilds the trades since go-live from Kraken data each run, and writes `donchian.html`.
+
+## Dip sleeve (separate paper account)
+
+- **Buy** when a coin closes the day more than 8% below the previous close; **sell** at the next day's close.
+- 10% of a $10k paper account per trade, at most 3 trades a day (the biggest drops), long only, same 10 coins.
+
+Backtest 2020–2026 (`dip.py`): 58% of trades win, +1.96% per trade; with the cap +16%/yr, worst drawdown −15%.
+Most of the profit came in 2020–21. `sleeves.py` fetches Kraken data once per hour and runs both sleeves.
 Research history: branch `smc-backtest`.
