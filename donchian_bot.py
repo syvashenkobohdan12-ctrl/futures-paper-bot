@@ -48,14 +48,17 @@ def trades_since(d, go):
     return out
 
 
-def run():
-    h1, missing = {}, []
-    for c, p in PRODUCTS.items():
-        try:
-            h1[c] = fetch_hourly(p, HISTORY_DAYS)
-        except Exception as e:
-            missing.append(f"{c} ({type(e).__name__})")
-        time.sleep(0.3)
+def run(h1=None, missing=None):
+    """h1: {coin: hourly df} from sleeves.py (fetched once for all sleeves); standalone runs fetch their own."""
+    if h1 is None:
+        h1, missing = {}, []
+        for c, p in PRODUCTS.items():
+            try:
+                h1[c] = fetch_hourly(p, HISTORY_DAYS)
+            except Exception as e:
+                missing.append(f"{c} ({type(e).__name__})")
+            time.sleep(0.3)
+    missing = missing or []
     if not h1:
         raise RuntimeError("no Kraken data")
     days = {c: daily_bars(d) for c, d in h1.items()}
@@ -129,7 +132,7 @@ h1{{font-size:20px;font-weight:600;margin:0}} h2{{font-size:15px;font-weight:600
 table{{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}} th,td{{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}} th{{color:var(--mut);font-weight:500;font-size:12px}}
 .pos{{color:var(--pos)}} .neg{{color:var(--neg)}}
 </style></head><body><main>
-<h1>Breakout sleeve <span class="muted" style="font-size:13px;font-weight:400">· PAPER · 10 Kraken perps · <a href="index.html">main bot</a></span></h1>
+<h1>Breakout sleeve <span class="muted" style="font-size:13px;font-weight:400">· PAPER · 10 Kraken perps · <a href="index.html">main bot</a> · <a href="dip.html">dip sleeve</a></span></h1>
 <div class="muted">Updated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · last closed day {state['last_day']}
 {(' · <b class="neg">no data: ' + ', '.join(state['missing']) + '</b>') if state.get('missing') else ''}</div>
 <div class="rules"><b>Buy</b> when the daily close is the highest in 20 days. <b>Sell</b> when it's the lowest in 10 days. 10% of the account per coin, long only.</div>
