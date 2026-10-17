@@ -16,7 +16,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt yfinance
-      - run: set -o pipefail; mkdir -p smc_results && python simple.py | tee smc_results/simple_report.txt
+      - run: set -o pipefail; mkdir -p smc_results && python pattern_scan.py | tee smc_results/pattern_report.txt
         env:
           ALPACA_PAPER_KEY_ID: ${{ secrets.ALPACA_PAPER_KEY_ID }}
           ALPACA_PAPER_SECRET_KEY: ${{ secrets.ALPACA_PAPER_SECRET_KEY }}
