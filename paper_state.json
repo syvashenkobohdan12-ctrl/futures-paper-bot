@@ -1,17 +1,50 @@
 {
- "cash": 100000,
- "open": {},
- "blocked": {},
+ "cash": 99916.0,
+ "open": {
+  "BTC|macd_4h": {
+   "d": 1,
+   "u": 0.47354650818643523,
+   "e": 84469.0,
+   "sp": 80245.55,
+   "entry": "2026-10-21 15:00:00",
+   "acc": -28.0
+  },
+  "ETH|macd_4h": {
+   "d": 1,
+   "u": 15.93308105954989,
+   "e": 2510.5,
+   "sp": 2384.975,
+   "entry": "2026-10-21 15:00:00",
+   "acc": -28.0
+  },
+  "SOL|macd_4h": {
+   "d": 1,
+   "u": 368.9696522461028,
+   "e": 108.41,
+   "sp": 102.98949999999999,
+   "entry": "2026-10-21 15:00:00",
+   "acc": -28.0
+  }
+ },
+ "blocked": {
+  "BTC|macd_4h": false,
+  "ETH|macd_4h": false,
+  "SOL|macd_4h": false
+ },
  "prev": {
   "BTC|daily_mom": 1,
-  "BTC|macd_4h": 0,
+  "BTC|macd_4h": 1,
   "ETH|daily_mom": 1,
-  "ETH|macd_4h": 0,
+  "ETH|macd_4h": 1,
   "SOL|daily_mom": 1,
-  "SOL|macd_4h": 0
+  "SOL|macd_4h": 1
  },
  "liquidated": null,
- "last_ts": "2026-10-21 14:00:00",
+ "last_ts": "2026-10-21 15:00:00",
  "start_cash": 100000,
- "rearm": {}
+ "rearm": {
+  "BTC|macd_4h": false,
+  "ETH|macd_4h": false,
+  "SOL|macd_4h": false
+ }
 }
