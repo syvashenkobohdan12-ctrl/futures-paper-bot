@@ -213,3 +213,4 @@
 2026-10-21 16:28:38  OPEN   SOL|macd_4h side=1 px=108.41 stop=102.99
 2026-10-21 16:28:38  processed 1 new hour(s) to 2026-10-21 15:00:00 | equity $99,916.00 | exposure 1.20x | open: BTC|macd_4h L@84,469.00, ETH|macd_4h L@2,510.50, SOL|macd_4h L@108.41
 2026-10-21 17:27:28  processed 1 new hour(s) to 2026-10-21 16:00:00 | equity $99,816.64 | exposure 1.20x | open: BTC|macd_4h L@84,469.00, ETH|macd_4h L@2,510.50, SOL|macd_4h L@108.41
+2026-10-21 18:29:23  processed 1 new hour(s) to 2026-10-21 17:00:00 | equity $100,060.12 | exposure 1.20x | open: BTC|macd_4h L@84,469.00, ETH|macd_4h L@2,510.50, SOL|macd_4h L@108.41
